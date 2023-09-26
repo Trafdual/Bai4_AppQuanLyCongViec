@@ -23,8 +23,6 @@ class DatabaseCongViec(context: Context) :
                 "$COLUMN_NAMECV TEXT, " +
                 "$COLUMN_DATECV TEXT)"
         db!!.execSQL(createTable)
-
-
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

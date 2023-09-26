@@ -37,6 +37,7 @@
             android:authorities="com.example.myapp.provider"
             android:exported="true"
              />
+        <service android:name="tranhph26979.fpoly.appquanlycongviec.service.CongViecService" />
     </application>
 
 

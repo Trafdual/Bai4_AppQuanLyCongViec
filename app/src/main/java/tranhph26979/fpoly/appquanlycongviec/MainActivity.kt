@@ -1,48 +1,69 @@
 package tranhph26979.fpoly.appquanlycongviec
 
-import android.content.Intent
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.*
+import android.database.Cursor
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ListView
 import android.widget.SimpleCursorAdapter
+import androidx.core.content.getSystemService
+import tranhph26979.fpoly.appquanlycongviec.Adapter.ConViecAdapter
 import tranhph26979.fpoly.appquanlycongviec.ContentProvider.ContentProviderCV
 import tranhph26979.fpoly.appquanlycongviec.database.DatabaseCongViec
+import tranhph26979.fpoly.appquanlycongviec.model.CongViec
+import tranhph26979.fpoly.appquanlycongviec.service.CongViecService
+import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var btnthem:Button
-    private lateinit var listview:ListView
+    private lateinit var btnthem: Button
+    private lateinit var listview: ListView
     private lateinit var contentProviderCV: ContentProviderCV
-    private lateinit var cursorAdapter: SimpleCursorAdapter
+    private lateinit var congviecAdapter: ConViecAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        btnthem=findViewById(R.id.btnthemcvman1)
-        contentProviderCV= ContentProviderCV()
-        btnthem.setOnClickListener(){
-            val intent=Intent(this@MainActivity,MainActivity2::class.java)
+        btnthem = findViewById(R.id.btnthemcvman1)
+        contentProviderCV = ContentProviderCV()
+        btnthem.setOnClickListener() {
+            val intent = Intent(this@MainActivity, MainActivity2::class.java)
             startActivity(intent)
         }
+        val intentFilter = IntentFilter("com.example.myapp.provider.DATA_CHANGED")
+        registerReceiver(dataChangedReceiver, intentFilter)
         listview=findViewById(R.id.listviewcv)
-        cursorAdapter=SimpleCursorAdapter(this,android.R.layout.simple_list_item_2,null,
-            arrayOf(DatabaseCongViec.COLUMN_NAMECV,DatabaseCongViec.COLUMN_DATECV),
-            intArrayOf(android.R.id.text1,android.R.id.text2),0
-        )
-
-        listview.adapter=cursorAdapter
-
+        val alarmManager:AlarmManager= getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent=Intent(this,CongViecService::class.java)
+        val pendingIntent:PendingIntent=PendingIntent.getService(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val calendar:Calendar=Calendar.getInstance()
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 6)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        updateTaskList()
+    }
+    private fun updateTaskList() {
+        val congviec = contentProviderCV.getTasksFromContentProvider(this@MainActivity)
+        congviecAdapter = ConViecAdapter(this@MainActivity, congviec)
+        listview.adapter = congviecAdapter
     }
 
-    override fun onResume() {
-        super.onResume()
-        val contentResolver=contentResolver
-        val cursor=contentResolver.query(
-            contentProviderCV.CONTENT_URI,
-            null,
-            null,
-            null,
-            null
-        )
-        cursorAdapter.swapCursor(cursor)
+    private val dataChangedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            updateTaskList()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(dataChangedReceiver)
     }
 }
+
+
+

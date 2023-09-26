@@ -21,7 +21,7 @@ class MainActivity2 : AppCompatActivity() {
     private lateinit var edtTencv:EditText
     private lateinit var edtNgaycv:EditText
     private lateinit var btnThemcvMan2:Button
-    private lateinit var contentProviderCV: ContentProviderCV
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +29,6 @@ class MainActivity2 : AppCompatActivity() {
         edtTencv=findViewById(R.id.edtnamecv)
         edtNgaycv=findViewById(R.id.edtngaycv)
         btnThemcvMan2=findViewById(R.id.btnthemcvman2)
-        contentProviderCV=ContentProviderCV()
 
         edtNgaycv.setOnClickListener(){
             showdatepicker()
@@ -42,7 +41,10 @@ class MainActivity2 : AppCompatActivity() {
             contentValues.put(DatabaseCongViec.COLUMN_DATECV,ngaycv)
 
             val contentResolver=contentResolver
-            contentResolver.insert(contentProviderCV.CONTENT_URI,contentValues)
+            contentResolver.insert(ContentProviderCV.TaskContract.TaskEntry.CONTENT_URI,contentValues)
+
+            val intent = Intent("com.example.myapp.provider.DATA_CHANGED")
+            sendBroadcast(intent)
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.HOUR_OF_DAY, 6)
             calendar.set(Calendar.MINUTE, 0)
