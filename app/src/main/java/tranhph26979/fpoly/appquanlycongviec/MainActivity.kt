@@ -1,5 +1,6 @@
 package tranhph26979.fpoly.appquanlycongviec
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.*
@@ -10,6 +11,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ListView
 import android.widget.SimpleCursorAdapter
+import android.widget.Toast
 import androidx.core.content.getSystemService
 import tranhph26979.fpoly.appquanlycongviec.Adapter.ConViecAdapter
 import tranhph26979.fpoly.appquanlycongviec.ContentProvider.ContentProviderCV
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var contentProviderCV: ContentProviderCV
     private lateinit var congviecAdapter: ConViecAdapter
 
+    @SuppressLint("UnspecifiedImmutableFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,12 +41,14 @@ class MainActivity : AppCompatActivity() {
         listview=findViewById(R.id.listviewcv)
         val alarmManager:AlarmManager= getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent=Intent(this,CongViecService::class.java)
-        val pendingIntent:PendingIntent=PendingIntent.getService(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val requestCode = 0
+        val pendingIntent:PendingIntent=PendingIntent.getService(this,requestCode,intent,PendingIntent.FLAG_UPDATE_CURRENT)
         val calendar:Calendar=Calendar.getInstance()
-        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.HOUR_OF_DAY, 6)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
+
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
         updateTaskList()
     }

@@ -8,11 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import tranhph26979.fpoly.appquanlycongviec.ContentProvider.ContentProviderCV
 import tranhph26979.fpoly.appquanlycongviec.R
 import tranhph26979.fpoly.appquanlycongviec.model.CongViec
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CongViecService : Service() {
     private lateinit var contentProviderCV: ContentProviderCV
@@ -27,18 +30,21 @@ class CongViecService : Service() {
 
         contentProviderCV = ContentProviderCV()
         mangcongviec = contentProviderCV.getTasksFromContentProvider(this)
+
+            Log.d("CongViecService", "Lúc 6 giờ sáng")
             if (mangcongviec.isEmpty()) {
-                showNotification("Không có công việc")
+                showNotification("Không có công việc",1)
             } else {
-                val congViec: CongViec = mangcongviec.get(0)
-                showNotification(congViec.nameCV)
-            }
+                for (congViec in mangcongviec) {
+                    showNotification(congViec.nameCV, mangcongviec.indexOf(congViec))
+                }
+        }
 
         return super.onStartCommand(intent, flags, startId)
     }
 
     @SuppressLint("MissingPermission")
-    private fun showNotification(content: String) {
+    private fun showNotification(content: String, requestCode: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "channel_id",
@@ -54,7 +60,7 @@ class CongViecService : Service() {
                 .setContentText(content)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             val notificationManager = NotificationManagerCompat.from(this)
-            notificationManager.notify(1, builder.build())
+            notificationManager.notify(requestCode, builder.build())
         }
     }
 }
